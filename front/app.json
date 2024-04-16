@@ -1,0 +1,9 @@
+{
+  "expo": {
+    name: "finances-app",
+    "slug": "finances-app",
+    "sdkVersion": "50.0.0",
+    "privacy": "public",
+    "orientation": "portrait"
+  }
+}
