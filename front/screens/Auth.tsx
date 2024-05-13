@@ -41,6 +41,7 @@ const Auth = ({ navigation }) => {
               width: 200,
               padding: 10,
               borderRadius: 30,
+              color: '#999999',
               ...styles.tAlignCenter,
             }}
             onPress={() => navigation.navigate('login')}

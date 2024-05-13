@@ -5,6 +5,7 @@ export class CreateOperationDto {
   @ApiProperty({
     type: Number,
     required: true,
+    example: 100,
   })
   @IsNotEmpty()
   sum: number;
@@ -12,6 +13,7 @@ export class CreateOperationDto {
   @ApiProperty({
     type: Number,
     required: true,
+    example: 2,
   })
   @IsNotEmpty()
   categoryId: number;
@@ -19,6 +21,7 @@ export class CreateOperationDto {
   @ApiProperty({
     type: Number,
     required: true,
+    example: 2,
   })
   @IsNotEmpty()
   accountId: number;
@@ -33,6 +36,7 @@ export class CreateOperationDto {
   @ApiProperty({
     type: Number,
     required: false,
+    example: 1,
   })
   @IsOptional()
   userId: number;

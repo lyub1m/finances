@@ -14,6 +14,9 @@ import {
   getCurrencies,
   updateAccount,
 } from "../api";
+import {HeaderType} from "../constants/header";
+import Header from "../components/Header";
+import Select from "../components/Select";
 
 export default function createAccountScreen({ state = {}, navigation, route = {}, setGlobalState }) {
   const axiosContext = useContext(AxiosContext);
@@ -49,32 +52,11 @@ export default function createAccountScreen({ state = {}, navigation, route = {}
 
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        borderRadius: 30,
-        paddingTop: 20,
-          ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.goBack()
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>{title}</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText={title}
+        navigation={navigation}
+        type={HeaderType.Back}
+      />
       <ScrollView>
         <View style={{ padding: 15 }}>
           <View style={{marginTop: 15, ...styles.rowAlignWCenter}}>
@@ -121,90 +103,26 @@ export default function createAccountScreen({ state = {}, navigation, route = {}
                   size={25}
                   style={{marginRight: 5}}
                 />
-                <Text>{e.name}</Text>
+                <Text style={styles.whiteText}>{e.name}</Text>
               </View>)
             }</View>
           </ScrollView>
-          <View style={{ marginTop: 30 }}>
-            <Text style={{ color: '#999999' }}>Иконка</Text>
-            <ScrollView
-              style={{ height: 'auto', maxHeight: 210, marginTop: 10 }}
-            >
-              <View style={{
-                marginTop: 20,
-                ...styles.wrap,
-                ...styles.rowAlignHCenter,
-              }}>
-                {materialCommunity.map((e, i) =>
-                  <View
-                    key={`icon-${i}-${e.name}`}
-                    style={{
-                      paddingLeft: 5,
-                      paddingRight: 5,
-                      paddingBottom: 5,
-                      marginBottom: 10,
-                      ...styles.alignCenter,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 60,
-                        height: 60,
-                        // backgroundColor: '#484545',
-                        borderRadius: 30,
-                        ...styles.alignCenter,
-                        ...icon === e.name && { backgroundColor: '#484545', borderRadius: 10 }
-                      }}
-                    >
-                      <MaterialCommunityIcons
-                        name={e.name}
-                        size={45}
-                        color="white"
-                        onPress={() => setIcon(e.name)}
-                      />
-                    </View>
-                  </View>
-                )}
-              </View>
-            </ScrollView>
-          </View>
-          <View style={{ marginTop: 30 }}>
-            <Text style={{ color: '#999999' }}>Цвет</Text>
-            <ScrollView
-              style={{ height: 'auto', maxHeight: 170, marginTop: 10 }}
-            >
-              <View style={{
-                backgroundColor: 'rgba(54,79,38,0.6)',
-                ...styles.wrap,
-                ...styles.rowAlignHCenter,
-              }}>
-                {htmlColors.map((e, i) =>
-                  <View
-                    key={`color-${i}-${e.color}`}
-                    style={{
-                      padding: 5,
-                      marginBottom: 10,
-                      ...styles.alignCenter,
-                      ...color === e.color && { backgroundColor: 'rgba(22,87,56,0.84)', borderRadius: 10 }
-                    }}
-                    onTouchEnd={() => setColor(e.color)}
-                  >
-                    <View
-                      style={{
-                        width: 30,
-                        height: 30,
-                        backgroundColor: e.color,
-                        borderRadius: 30,
-                        borderWidth: 2,
-                        borderColor: color === e.color ? e.color : '#4d6e36',
-                        ...styles.alignCenter,
-                      }}
-                    />
-                  </View>
-                )}
-              </View>
-            </ScrollView>
-          </View>
+          <Select
+            key="icon"
+            items={materialCommunity.map(e => ({ code: e.name, icon: e.name }))}
+            value={icon}
+            title="Иконка"
+            containerStyles={{ marginTop: 30 }}
+            onInput={(payload) => setIcon(payload)}
+          />
+          <Select
+            key="color"
+            items={htmlColors.map(e => ({ code: e.color, color: e.color }))}
+            value={color}
+            title="Цвет"
+            containerStyles={{ marginTop: 30 }}
+            onInput={(payload) => setColor(payload)}
+          />
         </View>
       </ScrollView>
       <View style={{ marginBottom: 15, height: 30, ...styles.alignCenter, ...styles.rowAlignHCenter }}>
@@ -264,7 +182,6 @@ export default function createAccountScreen({ state = {}, navigation, route = {}
               Alert.alert('Удалить счет?', name, [
                 {
                   text: 'Нет',
-                  onPress: () => console.log('Cancel Pressed'),
                   style: 'cancel',
                 },
                 {text: 'Да', onPress: async () => {

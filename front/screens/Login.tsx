@@ -1,12 +1,4 @@
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  TextInput,
-  Button,
-  Alert,
-} from 'react-native';
+import {Alert, SafeAreaView, StyleSheet, Text, TextInput, View,} from 'react-native';
 import React, {useContext, useState} from 'react';
 import {AuthContext} from '../context/AuthContext';
 import * as SecureStore from 'expo-secure-store';
@@ -14,6 +6,8 @@ import {AxiosContext} from '../context/AxiosContext';
 import Base from './Base'
 import globalStyles from "../global-styles";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import Header from "../components/Header";
+import {HeaderType} from "../constants/header";
 
 const Login = ({ navigation }) => {
   const [login, setLogin] = useState('');
@@ -53,32 +47,11 @@ const Login = ({ navigation }) => {
 
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        paddingTop: 20,
-        borderRadius: 30,
-        ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.goBack()
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>Вход</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText="Вход"
+        type={HeaderType.Back}
+        navigation={navigation}
+      />
       <SafeAreaView style={{padding: 30, }}>
         <View style={{marginTop: 40}}>
           <TextInput

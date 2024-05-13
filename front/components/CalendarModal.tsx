@@ -5,13 +5,14 @@ import {
   Pressable,
   TouchableWithoutFeedback,
   Modal,
+  TimePickerAndroidStatic,
 } from 'react-native';
 import React, {useMemo, useState} from 'react';
 import {Calendar, DateData, LocaleConfig} from 'react-native-calendars';
 import globalStyles from "../global-styles";
 import {months} from "../constants/months";
 import {getDateCode} from "../utils/date";
-import {MarkedDates} from "react-native-calendars/src/types";
+import {MarkedDates, MarkingTypes} from "react-native-calendars/src/types";
 import PropTypes from "prop-types";
 
 LocaleConfig.locales['ru'] = {
@@ -26,14 +27,26 @@ LocaleConfig.defaultLocale = 'ru';
 
 interface Props {
   visible: boolean;
-  maxDate: string;
+  markingType?: MarkingTypes;
+  key?: string;
+  maxDate?: string;
+  minDate?: string;
   onClose: () => void;
   onChange: (payload: any) => void;
   onPressDay: (payload: any) => void;
 }
 
 const CalendarModal = (props: Props) => {
-  const { visible, maxDate, onClose, onChange, onPressDay } = props;
+  const {
+    visible,
+    maxDate,
+    minDate,
+    markingType = 'period',
+    key = 'calendar-modal',
+    onClose,
+    onChange,
+    onPressDay,
+  } = props;
   const [startValue, setStartValue] = useState<any>();
   const [finishValue, setFinishValue] = useState<any>();
 
@@ -145,9 +158,12 @@ const CalendarModal = (props: Props) => {
             }}
           >
             <Calendar
+              key={key}
               theme={{
                 backgroundColor: '#363636',
                 calendarBackground: '#363636',
+                dayTextColor: 'white',
+                monthTextColor: 'white',
                 textDisabledColor: 'rgba(239,230,230,0.1)',
                 disabledArrowColor: '#1e1e1e',
                 disabledDotColor: '#1e1e1e',
@@ -160,8 +176,9 @@ const CalendarModal = (props: Props) => {
                 height: 320,
                 backgroundColor: '#363636',
               }}
-              markingType={'period'}
+              markingType={markingType}
               maxDate={maxDate}
+              minDate={minDate}
               markedDates={period}
               futureScrollRange={5}
               onDayPress={onDayPress}

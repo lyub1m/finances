@@ -1,5 +1,5 @@
 import React, {useContext, useEffect, useState} from 'react';
-import {Text, View, StyleSheet, Alert, Pressable, TouchableWithoutFeedback, Modal} from "react-native";
+import {Text, View, StyleSheet} from "react-native";
 import { DonutChart } from "react-native-circular-chart";
 import Base from './Base'
 import globalStyles from '../global-styles'
@@ -9,6 +9,10 @@ import {formatDate, formatMonth, getDateCode} from "../utils/date";
 import {AxiosContext} from "../context/AxiosContext";
 import {AuthContext} from "../context/AuthContext";
 import CalendarModal from "../components/CalendarModal";
+import Header from "../components/Header";
+import OperationTypeTabs from "../components/OperationTypeTabs";
+import {OperationType} from "../constants/operation";
+import List from "../components/List";
 
 
 
@@ -45,18 +49,21 @@ const getPeriods = () => {
   ]
 }
 
-export default function HomeScreen({ state, navigation }) {
+export default function HomeScreen({ state, navigation, route }) {
   const axiosContext = useContext(AxiosContext);
   const authContext = useContext(AuthContext);
   const periods = getPeriods()
+  const { params: routeParams } = route
 
-  const [type, setType] = useState('out');
+  const { type: typeFromRoute = OperationType.Out } = routeParams || {}
+
+  const [type, setType] = useState(typeFromRoute);
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
-  const [customPeriod, setCustomPeriod] = useState(null);
+  const [customPeriod, setCustomPeriod] = useState(routeParams?.date ? Object.values(routeParams?.date) : null);
   const customPeriodText = (customPeriod || [])
     .map(e => formatDate(new Date(e))).join(' - ')
   const [loadingOperations, setLoadingOperations] = useState(false);
-  const [enabledPeriod, setEnabledPeriod] = useState('week');
+  const [enabledPeriod, setEnabledPeriod] = useState(routeParams?.enabledPeriod || 'week');
   const [operations, setOperations] = useState([]);
   const currentPeriod = periods.find(e => e.code === enabledPeriod)
   const filter = {
@@ -64,6 +71,7 @@ export default function HomeScreen({ state, navigation }) {
     dateTo: enabledPeriod !== 'period' ? currentPeriod?.to : (customPeriod[1] || customPeriod[0]),
     type,
   }
+
   const updateOperations = (filter) => {
     setLoadingOperations(true)
     getOperations(axiosContext, filter)
@@ -83,6 +91,7 @@ export default function HomeScreen({ state, navigation }) {
       .catch(e => console.error(e))
   }
   useEffect(() => {
+
     updateOperations(filter)
   }, [enabledPeriod, type]);
   useEffect(() => {
@@ -103,7 +112,8 @@ export default function HomeScreen({ state, navigation }) {
     if (!result[operation.categoryId]) {
       result[operation.categoryId] = {
         name: operation?.category.name,
-        sum: operation.sum,
+        sum: operation.sum * (operation.account?.currencyInfo?.rate || 1),
+        currencyInfo: { character: currencyCharacter },
         color: operation?.category.color,
         icon: operation?.category.icon,
         categoryId: operation.categoryId,
@@ -113,60 +123,34 @@ export default function HomeScreen({ state, navigation }) {
     result[operation.categoryId].sum += operation.sum
   })
   let graph = Object.values(result)
-  const fullSumCurrentOperations = graph.reduce((s, e) => s + e.sum, 0)
+  const fullSumCurrentOperations = graph.reduce((sum, e) => sum + e.sum * (e.currencyInfo?.rate || 1), 0)
 
-  graph = graph.map(e => ({
-    ...e,
-    value: Math.floor((100 * e.sum) / fullSumCurrentOperations) || 1
-  }))
+  graph = graph.map(e => {
+    const value = Math.floor((100 * e.sum) / fullSumCurrentOperations) || 1
+    return {
+      ...e,
+      value,
+      subRight: `${value}%`
+    }
+  })
 
   if (!graph?.length) {
     graph = [{ color: '#999999', value: 1 }, { color: '#999999', value: 1 }]
   }
+
   const sumAccounts = authContext.authState.globalTotal
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        paddingTop: 20,
-        ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="menu"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.openDrawer();
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>Итого: {new Intl.NumberFormat().format(sumAccounts)} {currencyCharacter}</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText={`Итого: ${new Intl.NumberFormat().format(sumAccounts)} ${currencyCharacter}`}
+        navigation={navigation}
+      />
       <View style={styles.top} ></View>
       <View style={styles.middleContainer} >
-        <View style={styles.tabs}>
-          <View style={{ ...styles.buttonContainer, ...type === 'out' ? styles.buttonEnabledContainer : {} }}>
-            <Text
-              style={styles.button}
-              onPress={() => setType('out')}
-            >РАСХОДЫ</Text>
-          </View>
-          <View style={{ ...styles.buttonContainer, ...type === 'in' ? styles.buttonEnabledContainer : {} }}>
-            <Text
-              style={styles.button}
-              onPress={() => setType('in')}
-            >ДОХОДЫ</Text>
-          </View>
-        </View>
+        <OperationTypeTabs
+          value={type}
+          onInput={(payload) => { setType(payload) }}
+        />
         <View
           style={styles.middleContent}
         >
@@ -270,11 +254,12 @@ export default function HomeScreen({ state, navigation }) {
             </View>
           </View>
         </View>
-        {fullSumCurrentOperations && graph.map((item, index) =>
-        <View
-          style={styles.bottomContainer}
-          key={`${JSON.stringify(item)}-${index}`}
-          onTouchEnd={() => {
+        {fullSumCurrentOperations ? <List
+          items={graph}
+          key="home-operations"
+          containerStyles={{width: '100%', paddingLeft: 10, paddingRight: 10 }}
+          currencyCharacter={currencyCharacter}
+          onInput={(item) => {
             navigation.navigate(
               'categoryOperationsDetail',
               {
@@ -284,30 +269,15 @@ export default function HomeScreen({ state, navigation }) {
                 },
                 categoryId: item.categoryId,
                 date: enabledPeriod !== 'period' ? currentPeriod : {
-                  dateFrom: customPeriod[0],
-                  dateTo: customPeriod[1] || customPeriod[0],
+                  from: customPeriod[0],
+                  to: customPeriod[1] || customPeriod[0],
                 },
+                enabledPeriod,
                 type,
               }
             )
           }}
-        >
-          <View style={styles.rowAlignHCenter}>
-            <View style={{ ...styles.icon, ...styles.alignCenter, backgroundColor: item.color, marginRight: 5 }}>
-              {(item.icon && <MaterialCommunityIcons
-                  name={item.icon}
-                  size={23}
-                  color="white"
-              />)}
-            </View>
-            <Text style={{color: 'white'}}>{item.name}</Text>
-          </View>
-          <View style={styles.rowAlignHCenter}>
-            <Text style={{color: '#999999'}}>{item.value} %</Text>
-            <Text style={{color: 'white', width: 70, ...styles.tAlignCenter}}>{item.sum} {currencyCharacter}</Text>
-          </View>
-        </View>) || ''}
-        {/*<Text>{JSON.stringify(graph.concat(graph?.length === 1 ? [graph[0]] : []), null, 2)}</Text>*/}
+        /> : ''}
       </View>
     </Base>
   );

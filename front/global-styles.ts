@@ -1,10 +1,17 @@
 import {StyleSheet} from "react-native";
-
+const defaultText = {
+  color: '#999999',
+}
+const whiteText = {
+  color: '#ffffff',
+}
 export default StyleSheet.create({
+  defaultText,
+  whiteText,
   input: {
+    ...defaultText,
     borderBottomWidth: 2,
     borderColor: '#999999',
-    color: '#999999',
     fontSize: 15
   },
   wrap: {
@@ -85,7 +92,7 @@ export default StyleSheet.create({
   },
   button: {
     fontSize: 17,
-    color: 'white',
+    ...whiteText,
     fontWeight: 'bold',
     textAlign: 'center',
   },

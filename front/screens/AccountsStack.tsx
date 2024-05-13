@@ -31,42 +31,12 @@ export default function AccountsStackScreen({state, navigation: globalNavigation
       <AccountsStack.Screen
         name="accounts"
         navigationKey="accounts"
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#165738'
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#165738',
-            borderColor: '#165738'
-          },
-          headerTitleStyle: {
-            color: 'white'
-          },
-          headerTintColor: 'white',
-          headerShadowVisible: false,
-        }}
       >
         {(params) => prepareNode(params, AccountsScreen)}
       </AccountsStack.Screen>
       <AccountsStack.Screen
         name="createAccount"
         navigationKey="createAccount"
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#165738',
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#165738',
-            borderColor: '#165738'
-          },
-          headerTitleStyle: {
-            color: 'white'
-          },
-          headerTintColor: 'white',
-          headerShadowVisible: false,
-        }}
       >
         {(params) => prepareNode(params, CreateAccountScreen)}
       </AccountsStack.Screen>

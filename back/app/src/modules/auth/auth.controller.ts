@@ -1,8 +1,7 @@
 import {Body, Controller, Post, HttpCode, HttpStatus, UseGuards, Get, Request} from '@nestjs/common';
 import { AuthService } from './auth.service';
-import {ApiBearerAuth, ApiTags} from "@nestjs/swagger";
+import {ApiTags} from "@nestjs/swagger";
 import {LoginDto} from "./dto/login.dto";
-import { AuthGuard } from './auth.guard';
 import {Public} from "../../decorators/public.decorator";
 import {RegisterDto} from "./dto/register.dto";
 

@@ -7,6 +7,9 @@ import {CategoriesModule} from "./modules/categories/categories.module";
 import {AuthModule} from "./modules/auth/auth.module";
 import {UsersModule} from "./modules/users/users.module";
 import {CurrenciesModule} from "./modules/currencies/currencies.module";
+import {RegularOperationsModule} from "./modules/regular-operations/regular-operations.module";
+import { ScheduleModule } from '@nestjs/schedule';
+import {NotificationsModule} from "./modules/notifications/notifications.module";
 
 @Module({
   imports: [
@@ -16,6 +19,8 @@ import {CurrenciesModule} from "./modules/currencies/currencies.module";
     OperationsModule,
     AuthModule,
     UsersModule,
+    RegularOperationsModule,
+    NotificationsModule,
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -32,6 +37,7 @@ import {CurrenciesModule} from "./modules/currencies/currencies.module";
         };
       },
     }),
+    ScheduleModule.forRoot()
   ],
 })
 export class AppModule {}

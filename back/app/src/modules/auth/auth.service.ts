@@ -2,8 +2,6 @@ import {BadRequestException, Injectable, UnauthorizedException} from '@nestjs/co
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import {RegisterDto} from "./dto/register.dto";
-import {CreateUserDto} from "../users/dto/create-user.dto";
-
 
 @Injectable()
 export class AuthService {
@@ -17,8 +15,8 @@ export class AuthService {
     password: string,
   ): Promise<{ accessToken: string }> {
     const user = await this.usersService.findOneByLogin(username);
-    
-    if (password !== user.password) {
+    const isMatch = password === user?.password;
+    if (!isMatch) {
       throw new UnauthorizedException();
     }
     const payload = { sub: user.id, username: user.login };
