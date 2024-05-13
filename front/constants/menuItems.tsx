@@ -1,8 +1,9 @@
 import SettingsScreen from "../screens/Settings";
 import AccountsScreen from "../screens/Accounts";
 import GraphicsScreen from "../screens/Graphics";
-import RegularPaymentsScreen from "../screens/RegularPayments";
+import RegularPaymentsStackScreen from "../screens/RegularPaymentsStack";
 import RemindersScreen from "../screens/Reminders";
+import NotificationsScreen from "../screens/Notifications";
 import HomeStackScreen from "../screens/HomeStack";
 import CategoriesStackScreen from "../screens/CategoriesStack";
 import AccountsStackScreen from "../screens/AccountsStack";
@@ -37,13 +38,20 @@ export const MENU_ITEMS: menuItem[] = [
     iconName:'format-list-bulleted-type',
     component: CategoriesStackScreen,
   },
-  // {
-  //   name:'regularPayments',
-  //   title:'Регулярные платежи',
-  //   iconType:'Material',
-  //   iconName:'reminder',
-  //   component: RegularPaymentsScreen,
-  // },
+  {
+    name:'regularPaymentsStack',
+    title:'Регулярные платежи',
+    iconType:'Material',
+    iconName:'reminder',
+    component: RegularPaymentsStackScreen,
+  },
+  {
+    name:'notifications',
+    title:'Уведомления',
+    iconType:'Material',
+    iconName:'android-messages',
+    component: NotificationsScreen,
+  },
   // {
   //   name:'reminders',
   //   title:'Напоминания',

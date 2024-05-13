@@ -1,19 +1,20 @@
 import * as React from 'react';
+import {useContext, useEffect, useState} from 'react';
 import {ActivityIndicator, ScrollView, StyleSheet, Text, View} from "react-native";
 import Base from './Base'
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import globalStyles from "../global-styles";
-import {useContext, useEffect, useState} from "react";
 import {getCategories} from "../api";
 import {AxiosContext} from "../context/AxiosContext";
-import {AuthContext} from "../context/AuthContext";
+import Header from "../components/Header";
+import OperationTypeTabs from "../components/OperationTypeTabs";
+import {OperationType} from "../constants/operation";
 
 export default function CategoriesScreen({ navigation, route = {} }) {
   const axiosContext = useContext(AxiosContext);
-  const authContext = useContext(AuthContext);
   const { params: routeParams = {} } = route
-  const { typeCode = 'out' } = routeParams
-  const [type, setType] = useState(typeCode);
+  const { typeCode = OperationType.Out } = routeParams
+  const [type, setType] = useState(typeCode || OperationType.Out);
   const [categories, setCategories] = useState([]);
   const [loadingCategories, setLoadingCategories] = useState(() => false);
   const updateCategories = (type) => {
@@ -38,48 +39,17 @@ export default function CategoriesScreen({ navigation, route = {} }) {
   }, [navigation]);
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        paddingTop: 20,
-        ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="menu"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.openDrawer();
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>Категории</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText="Категории"
+        navigation={navigation}
+      />
       <ScrollView automaticallyAdjustKeyboardInsets={true}>
         <View style={styles.top} ></View>
         <View style={styles.middleContainer} >
-          <View style={styles.tabs}>
-            <View style={{ ...styles.buttonContainer, ...type === 'out' ? styles.buttonEnabledContainer : {} }}>
-              <Text
-                style={styles.button}
-                onPress={() => setType('out')}
-              >РАСХОДЫ</Text>
-            </View>
-            <View style={{ ...styles.buttonContainer, ...type === 'in' ? styles.buttonEnabledContainer : {} }}>
-              <Text
-                style={styles.button}
-                onPress={() => setType('in')}
-              >ДОХОДЫ</Text>
-            </View>
-          </View>
+          <OperationTypeTabs
+            value={type}
+            onInput={(payload) => { setType(payload) }}
+          />
         </View>
         <View style={{ marginTop: 40, paddingLeft: 10 }}>
           <View style={{

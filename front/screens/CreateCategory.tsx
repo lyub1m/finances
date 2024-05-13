@@ -7,12 +7,14 @@ import {useContext, useState} from "react";
 import {materialCommunity} from "../constants/material-icons";
 import {htmlColors} from "../constants/colors";
 import {AxiosContext} from "../context/AxiosContext";
-import {AuthContext} from "../context/AuthContext";
 import {createCategory, deleteCategory, updateCategory} from "../api";
+import {HeaderType} from "../constants/header";
+import Header from "../components/Header";
+import {operationTypes} from "../constants/operation";
+import Select from "../components/Select";
 
-export default function createCategoryScreen({ state = {}, navigation, route = {} }) {
+export default function createCategoryScreen({ navigation, route = {} }) {
   const axiosContext = useContext(AxiosContext);
-  const authContext = useContext(AuthContext);
   const {
     params: routeParams = {
       name: '',
@@ -33,32 +35,11 @@ export default function createCategoryScreen({ state = {}, navigation, route = {
 
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        borderRadius: 30,
-        paddingTop: 20,
-          ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.goBack()
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>{id ? 'Редактирование категории' : 'Добавление категории'}</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText={id ? 'Редактирование категории' : 'Добавление категории'}
+        navigation={navigation}
+        type={HeaderType.Back}
+      />
       <ScrollView>
         <View style={{ padding: 15 }}>
           <View style={{width: '100%'}}>
@@ -80,115 +61,38 @@ export default function createCategoryScreen({ state = {}, navigation, route = {
             >{name ? name.length : 0}/{60}</Text>
           </View>
           <View style={{ marginTop: 10, ...styles.rowAlignHCenter }}>
-            <View
-              style={{ marginBottom: 10, ...styles.rowAlignHCenter}}
+            {operationTypes.map(e => <View
+              style={{ marginRight: 10,  ...styles.rowAlignHCenter}}
+              key={`category-type-${e.code}`}
               onTouchEnd={() => {
-                setType('out')
+                setType(e.code)
               }}
             >
               <MaterialCommunityIcons
-                name={type === 'out' ? 'radiobox-marked' : 'radiobox-blank'}
+                name={type === e.code ? 'radiobox-marked' : 'radiobox-blank'}
                 color='#165738'
                 size={25}
-                style={{marginRight: 15}}
+                style={{marginRight: 5}}
               />
-              <Text>Расходы</Text>
-            </View>
-            <View
-              style={{marginLeft: 40, marginBottom: 10, ...styles.rowAlignHCenter}}
-              onTouchEnd={() => {
-                setType('in')
-              }}
-            >
-              <MaterialCommunityIcons
-                name={type === 'in' ? 'radiobox-marked' : 'radiobox-blank'}
-                color='#165738'
-                size={25}
-                style={{marginRight: 15}}
-              />
-              <Text>Доходы</Text>
-            </View>
+              <Text style={styles.whiteText}>{e.text}</Text>
+            </View>)}
           </View>
-          <View style={{ marginTop: 30 }}>
-            <Text style={{ color: '#999999' }}>Иконка</Text>
-            <ScrollView
-              style={{ height: 'auto', maxHeight: 240, marginTop: 10 }}
-            >
-              <View style={{
-                marginTop: 20,
-                ...styles.wrap,
-                ...styles.rowAlignHCenter,
-              }}>
-                {materialCommunity.map((e, i) =>
-                  <View
-                    key={`icon-${i}-${e.name}`}
-                    style={{
-                      paddingLeft: 5,
-                      paddingRight: 5,
-                      paddingBottom: 5,
-                      marginBottom: 10,
-                      ...styles.alignCenter,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 60,
-                        height: 60,
-                        // backgroundColor: '#484545',
-                        borderRadius: 30,
-                        ...styles.alignCenter,
-                        ...icon === e.name && { backgroundColor: '#484545', borderRadius: 10 }
-                      }}
-                    >
-                      <MaterialCommunityIcons
-                        name={e.name}
-                        size={45}
-                        color="white"
-                        onPress={() => setIcon(e.name)}
-                      />
-                    </View>
-                  </View>
-                )}
-              </View>
-            </ScrollView>
-          </View>
-          <View style={{ marginTop: 30 }}>
-            <Text style={{ color: '#999999' }}>Цвет</Text>
-            <ScrollView
-              style={{ height: 'auto', maxHeight: 170, marginTop: 10 }}
-            >
-              <View style={{
-                backgroundColor: 'rgba(54,79,38,0.6)',
-                ...styles.wrap,
-                ...styles.rowAlignHCenter,
-              }}>
-                {htmlColors.map((e, i) =>
-                  <View
-                    key={`color-${i}-${e.color}`}
-                    style={{
-                      padding: 5,
-                      marginBottom: 10,
-                      ...styles.alignCenter,
-                      ...color === e.color && { backgroundColor: 'rgba(22,87,56,0.84)', borderRadius: 10 }
-                    }}
-                    onTouchEnd={() => setColor(e.color)}
-                  >
-                    <View
-                      style={{
-                        width: 30,
-                        height: 30,
-                        backgroundColor: e.color,
-                        borderRadius: 30,
-                        borderWidth: 2,
-                        borderColor: color === e.color ? e.color : '#4d6e36',
-                        ...styles.alignCenter,
-                      }}
-                    />
-                  </View>
-                )}
-              </View>
-            </ScrollView>
-          </View>
+          <Select
+            key="icon"
+            items={materialCommunity.map(e => ({ code: e.name, icon: e.name }))}
+            value={icon}
+            title="Иконка"
+            containerStyles={{ marginTop: 30 }}
+            onInput={(payload) => setIcon(payload)}
+          />
+          <Select
+            key="color"
+            items={htmlColors.map(e => ({ code: e.color, color: e.color }))}
+            value={color}
+            title="Цвет"
+            containerStyles={{ marginTop: 30 }}
+            onInput={(payload) => setColor(payload)}
+          />
         </View>
       </ScrollView>
       <View style={{ marginBottom: 15, height: 30, ...styles.alignCenter, ...styles.rowAlignHCenter }}>
@@ -226,7 +130,7 @@ export default function createCategoryScreen({ state = {}, navigation, route = {
             }
             navigation.goBack()
           }}
-        >{id ? 'Сохранить' : 'Добавить' }</Text>
+        >{ id ? 'Сохранить' : 'Добавить' }</Text>
         {id && userId && <Text
           style={{
             marginTop: -45,
@@ -243,7 +147,6 @@ export default function createCategoryScreen({ state = {}, navigation, route = {
             Alert.alert('Удалить категорию?', name, [
               {
                 text: 'Нет',
-                onPress: () => console.log('Cancel Pressed'),
                 style: 'cancel',
               },
               {text: 'Да', onPress: async () => {

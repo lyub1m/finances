@@ -4,7 +4,6 @@ import {
   StyleSheet,
   SafeAreaView,
   TextInput,
-  Button,
   Alert,
 } from 'react-native';
 import React, {useContext, useState} from 'react';
@@ -14,6 +13,8 @@ import {AxiosContext} from '../context/AxiosContext';
 import Base from './Base'
 import globalStyles from "../global-styles";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
+import {HeaderType} from "../constants/header";
+import Header from "../components/Header";
 
 const Register = ({ navigation }) => {
   const [name, setName] = useState('');
@@ -59,32 +60,11 @@ const Register = ({ navigation }) => {
 
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        paddingTop: 20,
-        borderRadius: 30,
-        ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.goBack()
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>Регистрация</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText="Регистрация"
+        type={HeaderType.Back}
+        navigation={navigation}
+      />
       <SafeAreaView style={{padding: 30, }}>
         <View style={{marginTop: 40}}>
           {login && <Text

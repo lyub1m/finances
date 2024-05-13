@@ -39,63 +39,18 @@ export default function HomeStackScreen({ state, navigation: globalNavigation, s
       <HomeStack.Screen
         name="createOperation"
         navigationKey="createOperation"
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#165738'
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#165738',
-            borderColor: '#165738'
-          },
-          headerTitleStyle: {
-            color: 'white'
-          },
-          headerTintColor: 'white',
-          headerShadowVisible: false,
-        }}
       >
         {(params) => prepareNode(params, CreateOperationScreen)}
       </HomeStack.Screen>
       <HomeStack.Screen
         name="categoryOperationsDetail"
         navigationKey="categoryOperationsDetail"
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#165738',
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#165738',
-            borderColor: '#165738'
-          },
-          headerTitleStyle: {
-            color: 'white'
-          },
-          headerTintColor: 'white',
-          headerShadowVisible: false,
-        }}
       >
         {(params) => prepareNode(params, CategoryOperationsDetailScreen)}
       </HomeStack.Screen>
       <HomeStack.Screen
         name="createCategory"
         navigationKey="createCategory"
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#165738',
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#165738',
-            borderColor: '#165738'
-          },
-          headerTitleStyle: {
-            color: 'white'
-          },
-          headerTintColor: 'white',
-          headerShadowVisible: false,
-        }}
       >
         {(params) => prepareNode(params, CreateCategoryScreen)}
       </HomeStack.Screen>

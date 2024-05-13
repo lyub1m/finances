@@ -1,22 +1,22 @@
 import * as React from 'react';
-import {StyleSheet, Text, View, ScrollView, ActivityIndicator} from "react-native";
+import {useContext, useEffect, useState} from 'react';
+import {ActivityIndicator, ScrollView, StyleSheet, Text, View} from "react-native";
 import Base from './Base'
-import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {formatDate, getDateCode} from "../utils/date";
 import globalStyles from '../global-styles'
-import {useContext, useEffect, useState} from "react";
-import {getCategories, getOperations} from "../api";
+import {getOperations} from "../api";
 import {AxiosContext} from "../context/AxiosContext";
-import {AuthContext} from "../context/AuthContext";
+import Header from "../components/Header";
+import {HeaderType} from "../constants/header";
+import List from "../components/List";
 
 export default function categoryOperationsDetailScreen({ state, navigation, route = {} }) {
   const axiosContext = useContext(AxiosContext);
-  const authContext = useContext(AuthContext);
   const { params: routeParams = {} } = route
   const { category = {
     sum: 0,
     name: '',
-  }, date = null, type, categoryId } = routeParams
+  }, date = null, type, categoryId, enabledPeriod } = routeParams
   const { currencyCharacter } = state
   const [operations, setOperations] = useState([]);
   const [loadingOperations, setLoadingOperations] = useState(false);
@@ -53,42 +53,39 @@ export default function categoryOperationsDetailScreen({ state, navigation, rout
           items: []
         }
       }
-      res[code].items.push(i)
+
+      res[code].items.push({
+        ...i?.category,
+        ...i,
+        currencyInfo: i?.account?.currencyInfo,
+        subName: i?.account?.name,
+        subInfo: i?.comment,
+        accountId: i?.account?.id,
+        date: getDateCode(date),
+      })
       return res
     }, {}))
 
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        borderRadius: 30,
-        paddingTop: 20,
-          ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.goBack()
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.tAlignCenter,
-              fontSize: 20
-            }}>{category.name}</Text>
-            <Text style={{
-              ...styles.tAlignCenter,
-              fontSize: 22
-            }}>{category.sum} {currencyCharacter}</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        navigation={navigation}
+        type={HeaderType.Back}
+        customHandler={() => {
+          navigation.navigate('home', { date, type, enabledPeriod })
+        }}
+      >
+        <Text style={{
+          ...styles.tAlignCenter,
+          ...styles.whiteText,
+          fontSize: 20
+        }}>{category.name}</Text>
+        <Text style={{
+          ...styles.tAlignCenter,
+          ...styles.whiteText,
+          fontSize: 22
+        }}>{category.sum} {currencyCharacter}</Text>
+      </Header>
       <ScrollView>
         <View style={styles.alignCenter}>
           {loadingOperations && <View style={{ marginTop: 10, ...styles.rowAlignHCenter }}>
@@ -103,46 +100,25 @@ export default function categoryOperationsDetailScreen({ state, navigation, rout
               style={{ color: '#999999', marginLeft: 10 }}
             >{e.name}</Text>
             <View
-              style={{...styles.bottomContainer, width: '100%', ...styles.columnAlignHCenter}}
+              style={{...styles.bottomContainer, width: '100%', paddingLeft: 0, paddingRight: 0, ...styles.columnAlignHCenter}}
             >
-              {e.items.map((o, i) => <View
-                key={`category-operations-detail-${e.code}-${i}`}
-                style={{
-                  paddingTop: 10,
-                  paddingBottom: 10,
+              <List
+                items={e.items}
+                key="accounts"
+                containerStyles={{width: '100%' }}
+                currencyCharacter={currencyCharacter}
+                onInput={(item) => {
+                  navigation.navigate('createOperation', {
+                    typeCode: type,
+                    categoryId,
+                    id: item.id,
+                    comment: item.comment,
+                    date: item.date,
+                    accountId: item.accountId,
+                    sum: item.sum,
+                  })
                 }}
-              >
-                <View
-                  style={{
-                    width: '100%',
-                    ...styles.rowAlignHCenter,
-                    ...styles.alignCenterBetween,
-                    borderTopColor: '#999999',
-                    ...i !== 0 && { borderTopWidth: 1 }
-                  }}
-                >
-                  <View style={styles.rowAlignHCenter}>
-                    <View style={{
-                      ...styles.icon,
-                      ...styles.alignCenter,
-                      backgroundColor: o?.category.color,
-                      marginRight: 10
-                    }}>
-                      {(o?.category.icon && <MaterialCommunityIcons
-                          name={o?.category.icon}
-                          size={23}
-                          color="white"
-                      />)}
-                    </View>
-                    <View>
-                      <Text>{o?.category.name}</Text>
-                      <Text style={{ color: '#999999' }}>{o?.account?.name}</Text>
-                    </View>
-                  </View>
-                  <Text>{o.sum} {currencyCharacter}</Text>
-                </View>
-                {o.comment && <Text style={{ color: '#999999', fontSize: 12 }}>{o.comment}</Text>}
-              </View>)}
+              />
             </View>
           </View>)}
         </View>

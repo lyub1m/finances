@@ -61,6 +61,8 @@ export class OperationsService {
       .addSelect('category')
       .leftJoin('operation.account', 'account')
       .addSelect('account')
+      .leftJoin('account.currencyInfo', 'currencyInfo')
+      .addSelect('currencyInfo')
       .where('1=1')
       .orderBy('operation.created_at', 'DESC')
     if (type) {

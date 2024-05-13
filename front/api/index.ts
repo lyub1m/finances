@@ -99,6 +99,35 @@ export const deleteAccount = async (axiosContext, id) => {
   throw new Error(response)
 }
 
+
+export const getNotifications = async (axiosContext) => {
+  const url = BACKEND_URL
+  const response = await axiosContext.authAxios.get(`${url}/notifications`, )
+  if (response.status === 200) {
+    return response.data;
+  }
+  throw new Error(response)
+}
+
+export const getUnreadNotificationsCount = async (axiosContext) => {
+  const url = BACKEND_URL
+  const response = await axiosContext.authAxios.get(`${url}/notifications/unread/count`, )
+  if (response.status === 200) {
+    return response.data;
+  }
+  throw new Error(response)
+}
+
+export const updateNotification = async (axiosContext, fields, id) => {
+  const url = BACKEND_URL
+  const response = await axiosContext.authAxios.patch(`${url}/notifications/${id}`, fields)
+
+  if (response.status === 200) {
+    return response.data;
+  }
+  throw new Error(response)
+}
+
 export const getCategories = async (axiosContext, filter) => {
   const url = BACKEND_URL
   const response = await axiosContext.authAxios.get(`${url}/categories`, {
@@ -122,6 +151,43 @@ export const createCategory = async (axiosContext, fields) => {
 export const updateCategory = async (axiosContext, fields, id) => {
   const url = BACKEND_URL
   const response = await axiosContext.authAxios.patch(`${url}/categories/${id}`, fields)
+
+  if (response.status === 200) {
+    return response.data;
+  }
+  throw new Error(response)
+}
+export const getRegularPayments = async (axiosContext) => {
+  const url = BACKEND_URL
+  const response = await axiosContext.authAxios.get(`${url}/regular-operations`)
+  if (response.status === 200) {
+    return response.data;
+  }
+  throw new Error(response)
+}
+
+export const createRegularPayment = async (axiosContext, fields) => {
+  const url = BACKEND_URL
+  const response = await axiosContext.authAxios.post(`${url}/regular-operations`, fields)
+  if (response.status === 201) {
+    return response.data;
+  }
+  throw new Error(response)
+}
+
+export const updateRegularPayment = async (axiosContext, fields, id) => {
+  const url = BACKEND_URL
+  const response = await axiosContext.authAxios.patch(`${url}/regular-operations/${id}`, fields)
+
+  if (response.status === 200) {
+    return response.data;
+  }
+  throw new Error(response)
+}
+
+export const deleteRegularPayment = async (axiosContext, id) => {
+  const url = BACKEND_URL
+  const response = await axiosContext.authAxios.delete(`${url}/regular-operations/${id}`)
 
   if (response.status === 200) {
     return response.data;

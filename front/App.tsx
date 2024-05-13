@@ -11,13 +11,13 @@ import WelcomeStack from "./screens/welcom/WelcomeStack";
 import {Text, View} from "react-native";
 import globalStyles from "./global-styles";
 import {AxiosContext} from "./context/AxiosContext";
-import {getAccounts, getCurrentUser} from "./api";
+import {getAccounts, getCurrentUser, getUnreadNotificationsCount} from "./api";
 
 function LogoutButton() {
   return (
     <View style={globalStyles.rowAlignHCenter}>
-      <MaterialCommunityIcons size={24} name={'location-exit'}/>
-      <Text style={{marginLeft: 33}}>Выйти</Text>
+      <MaterialCommunityIcons color="#ffffff" size={24} name={'location-exit'}/>
+      <Text style={{marginLeft: 33, color: '#ffffff'}}>Выйти</Text>
     </View>
   );
 }
@@ -40,16 +40,16 @@ function CustomDrawerContent(props) {
       }}
       >
         <View
-          style={{padding: 5, borderRadius: 30, backgroundColor: '#867373'}}
+          style={{padding: 5, borderRadius: 30, backgroundColor: '#999999'}}
         >
-          <MaterialCommunityIcons name={'face-man'} size={40} />
+          <MaterialCommunityIcons color='#165738' name={'face-man'} size={40} />
         </View>
         <View>
           <Text
-            style={{ marginLeft: 10, fontSize: 20 }}
+            style={{ marginLeft: 10, fontSize: 20, color: '#ffffff' }}
           >{`${name} (${login})`}</Text>
           <Text
-            style={{ marginLeft: 10, fontSize: 15 }}
+            style={{ marginLeft: 10, fontSize: 15, color: '#999999' }}
           >{`Остаток: ${new Intl.NumberFormat().format(globalTotal)} ₽`}</Text>
         </View>
       </View>
@@ -68,6 +68,7 @@ export default function App() {
   const authContext = useContext(AuthContext);
   const axiosContext = useContext(AxiosContext);
   const [status, setStatus] = useState('loading');
+  const [notificationsCount, setNotificationsCount] = useState(0);
   const initialState = {
     currency: 'RUB',
     currencyCharacter: '₽',
@@ -95,6 +96,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const timer = setInterval(() => {
+      getUnreadNotificationsCount(axiosContext)
+        .then(data => setNotificationsCount(data))
+        .catch(error => {
+          console.error(error);
+          clearInterval(timer)
+        });
+    }, 5000);
+    return () => clearInterval(timer);
+  });
+
+  useEffect(() => {
     loadJWT().then();
   }, [loadJWT]);
   useEffect(() => {
@@ -111,6 +124,11 @@ export default function App() {
           user: data,
         })
       }).catch(e => console.error(e))
+      getUnreadNotificationsCount(axiosContext)
+        .then(data => setNotificationsCount(data))
+        .catch(error => {
+          console.error(error);
+        });
     }
   }, [authContext.authState?.authenticated]);
 
@@ -143,7 +161,7 @@ export default function App() {
           DrawerItems.map(drawer => <Drawer.Screen
             key={drawer.name}
             name={drawer.name}
-            options={getDrawerScreenOptions(drawer)}
+            options={getDrawerScreenOptions(drawer, notificationsCount)}
           >{({ navigation, route }) => {
             const Node = drawer.component;
             return <Node state={state} setGlobalState={setState} navigation={navigation} route={route} />
@@ -154,9 +172,21 @@ export default function App() {
   );
 }
 
-const getDrawerScreenOptions = (drawer) => {
+const getDrawerScreenOptions = (drawer, notificationsCount) => {
   return {
-    title: drawer.title,
+    title: () => {
+      return <View style={globalStyles.rowAlignHCenter}>
+        <Text key={`menu-title-${drawer.name}`} style={globalStyles.whiteText}>{drawer.title}</Text>
+        {drawer.name === 'notifications' && notificationsCount ? <MaterialCommunityIcons
+          name={notificationsCount > 9
+            ? 'numeric-9-plus-circle'
+            : `numeric-${notificationsCount}-circle`}
+          size={24}
+          style={{marginLeft: 10}}
+          color="white"
+        /> : ''}
+      </View>
+    },
     drawerInactiveBackgroundColor: '#165738',
     drawerActiveBackgroundColor: 'rgba(22,87,56,0.79)',
     headerStyle: {

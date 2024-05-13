@@ -15,27 +15,46 @@ import {useContext, useEffect, useState} from "react";
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import {formatDate, getDateCode} from "../utils/date";
 import globalStyles from '../global-styles'
-import {createOperation, getAccounts, getCategories, updateAccount, updateOperation} from "../api";
+import {
+  createOperation,
+  deleteCategory,
+  deleteOperation,
+  getAccounts,
+  getCategories,
+  updateAccount,
+  updateOperation
+} from "../api";
 import {AxiosContext} from "../context/AxiosContext";
-import {AuthContext} from "../context/AuthContext";
 import CalendarModal from "../components/CalendarModal";
+import {HeaderType} from "../constants/header";
+import Header from "../components/Header";
+import OperationTypeTabs from "../components/OperationTypeTabs";
+import {OperationType} from "../constants/operation";
+import Select from "../components/Select";
 
 export default function CreateOperationScreen({ state, setGlobalState, navigation, route }) {
   const axiosContext = useContext(AxiosContext);
-  const authContext = useContext(AuthContext);
   const { currency: currencyCode } = state;
   const { params: routeParams } = route || {}
-  const { categoryId = null, typeCode = 'out', id = null } = routeParams || {}
+  const {
+    categoryId = null,
+    accountId = null,
+    typeCode = OperationType.Out,
+    id = null,
+    comment: routeComment = '',
+    sum: routeSum = '',
+    date: dateCode,
+  } = routeParams || {}
   const [accountModalVisible, setAccountModalVisible] = useState(() => false);
   const [calendarModalVisible, setCalendarModalVisible] = useState(false);
   const [type, setType] = useState(typeCode);
-  const [comment, setComment] = useState((): string | undefined => undefined);
-  const [sum, setSum] = useState((): string => '');
+  const [comment, setComment] = useState(routeComment);
+  const [sum, setSum] = useState((): string => String(routeSum || ''));
   const [category, setCategory] = useState(() => categoryId);
   const [categories, setCategories] = useState(() => []);
   const [loadingCategories, setLoadingCategories] = useState(() => false);
   const [accounts, setAccounts] = useState(() => []);
-  const [account, setAccount] = useState(() => accounts[0]?.id);
+  const [account, setAccount] = useState(() => accountId || accounts[0]?.id);
   const [loadingAccounts, setLoadingAccounts] = useState(() => false);
   useEffect(() => {
     if (!account && accounts.length) {
@@ -72,8 +91,7 @@ export default function CreateOperationScreen({ state, setGlobalState, navigatio
     return unsubscribe;
   }, [navigation]);
   const currentDate = new Date()
-  const currentDateString = formatDate(currentDate, false)
-  const [date, setDate] = useState(() => getDateCode(currentDate));
+  const [date, setDate] = useState(() => getDateCode(new Date(dateCode)));
   const t = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 1)
   const tt = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate() - 2)
   const exampleDates = [
@@ -86,48 +104,18 @@ export default function CreateOperationScreen({ state, setGlobalState, navigatio
   const isValid = !!(type && parseInt(sum) && category && account && date)
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        paddingTop: 20,
-        ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="arrow-left"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.goBack()
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>Добавление операции</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText={id ? 'Редактирование операции' : 'Добавление операции'}
+        navigation={navigation}
+        type={HeaderType.Back}
+      />
       <ScrollView automaticallyAdjustKeyboardInsets={true}>
         <View style={styles.top} ></View>
         <View style={styles.middleContainer} >
-          <View style={styles.tabs}>
-            <View style={{ ...styles.buttonContainer, ...type === 'out' ? styles.buttonEnabledContainer : {} }}>
-              <Text
-                style={styles.button}
-                onPress={() => setType('out')}
-              >РАСХОДЫ</Text>
-            </View>
-            <View style={{ ...styles.buttonContainer, ...type === 'in' ? styles.buttonEnabledContainer : {} }}>
-              <Text
-                style={styles.button}
-                onPress={() => setType('in')}
-              >ДОХОДЫ</Text>
-            </View>
-          </View>
+          <OperationTypeTabs
+            value={type}
+            onInput={(payload) => { setType(payload) }}
+          />
         </View>
         <View style={{marginTop: 30, ...styles.rowAlignWCenter}}>
           <TextInput
@@ -149,99 +137,27 @@ export default function CreateOperationScreen({ state, setGlobalState, navigatio
             onPress={() => setAccountModalVisible(true)}
           >{accounts.find(e => e.id === account)?.name}</Text>
         </View>
-        <View style={{ marginTop: 25, paddingLeft: 10 }}>
-          <Text
-            style={{ color: '#999999' }}
-          >Категории</Text>
-          <ScrollView
-            key={`category-type-${type}`}
-            // horizontal={true}
-            style={{height: 'auto', maxHeight: 290}}
-          >
-            <View style={{
-              marginTop: 20,
-              ...styles.wrap,
-              ...styles.rowAlignHCenter,
-            }}>
-              {loadingCategories && <View style={{
-                marginTop: 10,
-                paddingTop: 24,
-                paddingLeft: 5,
-                paddingRight: 5,
-                paddingBottom: 23,
-                ...styles.alignCenter,
-                ...styles.rowAlignHCenter
-              }}>
-                  <ActivityIndicator size="large" color="#007aff" />
-                  <Text style={{ marginLeft: 10 }}>Загрузка</Text>
-              </View>}
-              {!loadingCategories && categories.map((e) =>
-                <View
-                  key={`category-${JSON.stringify(e)}`}
-                  style={{
-                    paddingLeft: 5,
-                    paddingRight: 5,
-                    paddingBottom: 5,
-                    marginBottom: 10,
-                    ...styles.alignCenter,
-                    ...category === e.id && { backgroundColor: e.color, borderRadius: 10 }
-                  }}
-                >
-                  <View
-                    style={{
-                      width: 50,
-                      height: 50,
-                      backgroundColor: e.color,
-                      borderRadius: 30,
-                      ...styles.alignCenter
-                    }}
-                  >
-                    <MaterialCommunityIcons
-                      name={e.icon}
-                      size={40}
-                      color="white"
-                      onPress={() => setCategory(e.id)}
-                    />
-                  </View>
-                  <Text
-                    style={{ color: '#c7bfbf', fontSize: 13 }}
-                  >{e.name}</Text>
-                </View>
-              ) || <View/>}
-              {!loadingCategories && <View
-                key={'category-add'}
-                style={{
-                  ...styles.alignCenter,
-                  marginLeft: 13,
-                  marginBottom: 14,
-                  paddingLeft: 5
-                }}
-                onTouchEnd={() => {
-                  navigation.navigate('createCategory')
-                }}
-              >
-                <View
-                  style={{
-                    width: 50,
-                    height: 50,
-                    backgroundColor: 'gray',
-                    borderRadius: 30,
-                    ...styles.alignCenter
-                  }}
-                >
-                  <MaterialCommunityIcons
-                    name="plus"
-                    size={45}
-                    color="white"
-                  />
-                </View>
-                <Text
-                  style={{ color: '#c7bfbf', fontSize: 13, marginTop: 5 }}
-                >Добавить</Text>
-              </View> || <View/>}
-            </View>
-          </ScrollView>
-        </View>
+        {categories?.length ? <Select
+          key="category"
+          items={categories.map(e => ({ ...e, code: e.id, text: e.name })).concat({
+            code: 'category-add',
+            color: 'gray',
+            icon: 'plus',
+            text: 'Добавить',
+            noSelectable: true,
+          })}
+          value={category}
+          loading={loadingCategories}
+          title="Категория"
+          containerStyles={{  marginTop: 25, paddingLeft: 10  }}
+          onInput={(payload) => {
+            if (payload === 'category-add') {
+              navigation.navigate('createCategory')
+              return
+            }
+            setCategory(payload)
+          }}
+        /> : ''}
         <ScrollView horizontal>
           <View style={{ marginTop: 30, paddingLeft: 10, ...styles.rowAlignHCenter }}>
             {exampleDates
@@ -379,7 +295,7 @@ export default function CreateOperationScreen({ state, setGlobalState, navigatio
           </Pressable>
         </Modal>
       </ScrollView>
-      <View style={{ marginBottom: 15, height: 30, ...styles.alignCenter, }}>
+      <View style={{ marginBottom: 15, height: 30, ...styles.alignCenter, ...styles.rowAlignHCenter }}>
         <Text
           style={{
             marginTop: -45,
@@ -418,7 +334,35 @@ export default function CreateOperationScreen({ state, setGlobalState, navigatio
             }
             navigation.goBack()
           }}
-        >Добавить</Text>
+        >{ id ? 'Сохранить' : 'Добавить' }</Text>
+        {id && <Text
+            style={{
+              marginTop: -45,
+              height: 45,
+              width: 150,
+              backgroundColor: '#868080',
+              ...!isValid && { opacity: 0.5 },
+              padding: 10,
+              borderRadius: 30,
+              marginLeft: 15,
+              ...styles.tAlignCenter,
+            }}
+            onPress={async () => {
+              Alert.alert('Удалить операцию?', '', [
+                {
+                  text: 'Нет',
+                  style: 'cancel',
+                },
+                {
+                  text: 'Да',
+                  onPress: async () => {
+                    await deleteOperation(axiosContext, id)
+                    navigation.goBack()
+                  }
+                }
+              ]);
+            }}
+        >Удалить</Text> || <View/>}
       </View>
     </Base>
   );
@@ -429,10 +373,5 @@ const styles = StyleSheet.create({
   top: {
     ...globalStyles.top,
     height: 57,
-  },
-  tabs: {
-    ...globalStyles.tabs,
-    flex: null,
-    height: 30,
   },
 });

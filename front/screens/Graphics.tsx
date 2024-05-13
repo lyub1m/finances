@@ -3,36 +3,15 @@ import {StyleSheet, Text, View} from "react-native";
 import Base from './Base'
 import {MaterialCommunityIcons} from "@expo/vector-icons";
 import globalStyles from "../global-styles";
+import Header from "../components/Header";
 
 export default function GraphicsScreen({ navigation }) {
   return (
     <Base>
-      <View style={{
-        height: 100,
-        width: '100%',
-        backgroundColor: '#165738',
-        borderRadius: 30,
-        paddingTop: 20,
-        ...styles.rowAlignHCenter
-      }}>
-        <MaterialCommunityIcons
-          name="menu"
-          size={23}
-          color="white"
-          style={{ marginLeft:20 }}
-          onPress={() => {
-            navigation.openDrawer()
-          }}
-        />
-        <View style={{ width: '80%', ...styles.alignCenter }}>
-          <View>
-            <Text style={{
-              ...styles.button,
-              fontSize: 20
-            }}>Графики</Text>
-          </View>
-        </View>
-      </View>
+      <Header
+        titleText="Графики"
+        navigation={navigation}
+      />
       <Text
         style={{ fontSize: 16, color: 'white' }}
       >Графики</Text>

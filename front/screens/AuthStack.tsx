@@ -40,42 +40,12 @@ export default function AuthStackScreen({ state, navigation: globalNavigation, s
         <AuthStack.Screen
           name="login"
           navigationKey="login"
-          options={{
-            headerShown: false,
-            headerStyle: {
-              backgroundColor: '#165738'
-            },
-            headerBackgroundContainerStyle: {
-              backgroundColor: '#165738',
-              borderColor: '#165738'
-            },
-            headerTitleStyle: {
-              color: 'white'
-            },
-            headerTintColor: 'white',
-            headerShadowVisible: false,
-          }}
         >
           {(params) => prepareNode(params, LoginScreen)}
         </AuthStack.Screen>
         <AuthStack.Screen
           name="register"
           navigationKey="register"
-          options={{
-            headerShown: false,
-            headerStyle: {
-              backgroundColor: '#165738'
-            },
-            headerBackgroundContainerStyle: {
-              backgroundColor: '#165738',
-              borderColor: '#165738'
-            },
-            headerTitleStyle: {
-              color: 'white'
-            },
-            headerTintColor: 'white',
-            headerShadowVisible: false,
-          }}
         >
           {(params) => prepareNode(params, RegisterScreen)}
         </AuthStack.Screen>

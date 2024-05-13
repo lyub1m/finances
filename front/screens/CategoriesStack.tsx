@@ -31,42 +31,12 @@ export default function CategoriesStackScreen({state, navigation: globalNavigati
       <CategoriesStack.Screen
         name="categories"
         navigationKey="categories"
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#165738'
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#165738',
-            borderColor: '#165738'
-          },
-          headerTitleStyle: {
-            color: 'white'
-          },
-          headerTintColor: 'white',
-          headerShadowVisible: false,
-        }}
       >
         {(params) => prepareNode(params, CategoriesScreen)}
       </CategoriesStack.Screen>
       <CategoriesStack.Screen
         name="createCategory"
         navigationKey="createCategory"
-        options={{
-          headerShown: false,
-          headerStyle: {
-            backgroundColor: '#165738',
-          },
-          headerBackgroundContainerStyle: {
-            backgroundColor: '#165738',
-            borderColor: '#165738'
-          },
-          headerTitleStyle: {
-            color: 'white'
-          },
-          headerTintColor: 'white',
-          headerShadowVisible: false,
-        }}
       >
         {(params) => prepareNode(params, CreateCategoryScreen)}
       </CategoriesStack.Screen>
